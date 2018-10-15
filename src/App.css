@@ -2,13 +2,23 @@ body {
   user-select: none;
 }
 
+.App {
+  width: 910px;
+  margin: 0 auto;
+}
+
+.app-label-region {
+  width: 700px;
+  height: 550px;
+  float: left;
+  border: 1px solid #ccc;
+}
+
 .header {
   width: 700px;
   height: 50px;
   line-height: 50px;
-  margin: 0 auto;
   position: relative;
-  border: 1px solid #ccc;
   background-color: #f6f7fb;
 }
 .editor-region {
@@ -26,20 +36,15 @@ body {
   margin: 0 4px;
 }
 
-.App {
+.imageContainer {
   text-align: center;
   width: 700px;
   height: 500px;
-  margin: 0 auto;
   position: relative;
-  border: 1px solid #ccc; 
   overflow: hidden;
 }
 .uploadImage {
   position: absolute;
-  /* top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.5); */
 }
 .labelRegion {
   position: absolute;
@@ -50,4 +55,76 @@ body {
   justify-content: center;
   border: 1px solid #ddd;
   background-color: rgba(71,118,241,.4);
+}
+
+.label-name-region {
+  height: 30px;
+  line-height: 30px;
+  background-color: rgba(255, 255, 255, 0.3);
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+.label-del {
+  cursor: pointer;
+}
+.label-name-region span{
+  font-size: 14px;
+  color: rgb(51, 51, 51);
+  margin-left: 4px;
+}
+
+.app-tags-region {
+  width: 204px;
+  height: 550px;
+  border: 1px solid #ccc;
+  float: left;
+}
+.label-tags-header {
+  width: 204px;
+  height: 50px;
+  line-height: 50px;
+  position: relative;
+  background-color: #f6f7fb;
+}
+.label-tags-container {
+  text-align: center;
+  width: 204px;
+  height: 500px;
+  position: relative;
+  overflow: hidden;
+}
+.add-label-tag {
+  margin: 10px;
+  width: 184px;
+  height: 40px;
+  line-height: 40px;
+  background-color: #108cee;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+}
+.input-tag-region {
+  width: 184px;
+  height: 30px;
+  line-height: 30px;
+  position: relative;
+}
+.input-label-tag {
+  width: 184px;
+  height: 30px;
+  line-height: 30px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+}
+.input-confirm-cancel {
+  height: 30px;
+  line-height: 30px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #2883fd;
 }
