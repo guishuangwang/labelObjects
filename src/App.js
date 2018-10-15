@@ -165,7 +165,8 @@ class App extends Component {
   onMouseUp = (e) => {
     let {currentStatus, currentLabelRect, labelRectsList} = this.state;
     if(currentStatus === 'inLabel') {
-      if(this.inEditing) {
+      // drag stop会触发mouse up，防止push空的数据
+      if(this.inEditing && currentLabelRect.width !== '') {
         labelRectsList.push(currentLabelRect);
         this.setState({
           labelRectsList,
@@ -230,6 +231,12 @@ class App extends Component {
 
   render() {
     let {currentLabelRect:{width, height, x, y}, imageAttr, labelRectsList, currentStatus} = this.state;
+    let resizeHandleStyle = {
+      width: 8,
+      height: 8,
+      backgroundColor: 'white',
+      borderRadius: '50%'
+    };
     return (
       <div>
         <div className="header">
@@ -287,6 +294,13 @@ class App extends Component {
                     onResize={this.onResize.bind(this, index)}
                     onResizeStop={this.onResizeStop.bind(this, index)}
                     bounds="parent"
+                    // resizeHandleClasses={{topLeft: 'resizeHandle', topRight: 'resizeHandle', bottomLeft: 'resizeHandle', bottomRight: 'resizeHandle'}}
+                    resizeHandleStyles={{
+                      topLeft: {...resizeHandleStyle, left: -4, top: -4},
+                      topRight: {...resizeHandleStyle, right: -4, top: -4},
+                      bottomLeft: {...resizeHandleStyle, left: -4, bottom: -4},
+                      bottomRight: {...resizeHandleStyle, right: -4, bottom: -4}
+                    }}
                     key={index}
                   >
                   </Rnd>
