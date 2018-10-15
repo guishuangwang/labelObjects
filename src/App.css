@@ -1,0 +1,53 @@
+body {
+  user-select: none;
+}
+
+.header {
+  width: 700px;
+  height: 50px;
+  line-height: 50px;
+  margin: 0 auto;
+  position: relative;
+  border: 1px solid #ccc;
+  background-color: #f6f7fb;
+}
+.editor-region {
+  position: absolute;
+  right: 20px;
+}
+.editor-region i {
+  font-size: 20px;
+  color: #666;
+  width: 30px;
+  height: 50px;
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  margin: 0 4px;
+}
+
+.App {
+  text-align: center;
+  width: 700px;
+  height: 500px;
+  margin: 0 auto;
+  position: relative;
+  border: 1px solid #ccc; 
+  overflow: hidden;
+}
+.uploadImage {
+  position: absolute;
+  /* top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.5); */
+}
+.labelRegion {
+  position: absolute;
+}
+
+.rnd {
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  background-color: rgba(71,118,241,.4);
+}
