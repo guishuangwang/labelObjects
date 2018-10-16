@@ -2,9 +2,17 @@ body {
   user-select: none;
 }
 
+.clearfix::after {
+  clear: both;
+  display: block;
+  content: '';
+  visibility: hidden;
+  height: 0;
+}
+
 .App {
   width: 910px;
-  margin: 0 auto;
+  margin: 20px auto;
 }
 
 .app-label-region {
@@ -147,4 +155,14 @@ body {
 }
 .current-added-tags-li:hover {
   background-color: #eee;
+}
+
+.save-label-data {
+  width: 200px;
+  height: 30px;
+  line-height: 30px;
+  background-color: #108cee;
+  text-align: center;
+  color: white;
+  margin: 20px auto;
 }

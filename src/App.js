@@ -41,6 +41,7 @@ class App extends Component {
     this.inEditing = false;
     this.editingStartX = 0;
     this.editingStartY = 0;
+    this.currentRectIndex = 0; // 当前操作的矩形索引
     // bind
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -76,11 +77,11 @@ class App extends Component {
 
   onResize = (idx, e, direction, ref, delta, position) => {
     let {labelRectsList} = this.state;
-    labelRectsList[idx] = {
+    labelRectsList[idx] = Object.assign({}, labelRectsList[idx], {
       width: ref.style.width,
       height: ref.style.height,
       ...position,
-    }
+    });
     this.setState({
       labelRectsList
     });
@@ -88,6 +89,7 @@ class App extends Component {
 
   onResizeStop = (idx, e, direction, ref, delta, position) => {
     console.log('x: ', position.x, ',y: ', position.y, ',width: ', ref.style.width, ',height: ', ref.style.height);
+    this.currentRectIndex = idx;
   }
 
   // 阻止冒泡，防止对rnd组件操作触发onMouseMove
@@ -99,16 +101,17 @@ class App extends Component {
     let {labelRectsList} = this.state;
     let w = labelRectsList[idx].width;
     let h = labelRectsList[idx].height;
-    labelRectsList[idx] = {
+    labelRectsList[idx] = Object.assign({}, labelRectsList[idx], {
       width: w,
       height: h,
       x: d.x,
       y: d.y
-    }
+    });
     this.setState({
       labelRectsList
     });
     console.log('x: ', d.x, ',y: ', d.y, ',width: ', w, ',height: ', h);
+    this.currentRectIndex = idx;
   }
 
   onClickLabel = () => {
@@ -265,8 +268,20 @@ class App extends Component {
   }
 
   // 点击右侧标签
-  onChooseCurrentTag = () => {
+  onChooseCurrentTag = (tagName, e) => {
+    let {labelRectsList} = this.state;
+    let currentRectIndex = this.currentRectIndex;
+    labelRectsList[currentRectIndex].labelName = tagName;
+    this.setState({
+      labelRectsList
+    });
+  }
 
+  // 保存当前标注数据
+  onSaveLabelData = (e) => {
+    let {labelRectsList, imageScale} = this.state;
+    console.log('标注数据：', labelRectsList);
+    console.log('图片缩放比例：', imageScale);
   }
 
   render() {
@@ -278,113 +293,116 @@ class App extends Component {
       borderRadius: '50%'
     };
     return (
-      <div className="App">
-        <div className="app-label-region">
-          <div className="header">
-            <span>请调节框的大小和位置确定标注区域，并在右侧添加或选择标签。</span>
-            <span className="editor-region">
-              <i className="editor-region-label" onClick={this.onClickLabel}>
-                <FaEdit />
-              </i>
-              <i className="editor-region-move" onClick={this.onClickMove}>
-                <FaArrowsAlt />
-              </i>
-              <i className="editor-region-zoom-in" onClick={this.onZoomIn}>
-                <FaSearchPlus />
-              </i>
-              <i className="editor-region-zoom-out" onClick={this.onZoomOut}>
-                <FaSearchMinus />
-              </i>
-            </span>
+      <div>
+        <div className="App clearfix">
+          <div className="app-label-region">
+            <div className="header">
+              <span>请调节框的大小和位置确定标注区域，并在右侧添加或选择标签。</span>
+              <span className="editor-region">
+                <i className="editor-region-label" onClick={this.onClickLabel}>
+                  <FaEdit color={currentStatus === 'inLabel' ? '#0776dd' : null}/>
+                </i>
+                <i className="editor-region-move" onClick={this.onClickMove}>
+                  <FaArrowsAlt color={currentStatus === 'inMoving' ? '#0776dd' : null}/>
+                </i>
+                <i className="editor-region-zoom-in" onClick={this.onZoomIn}>
+                  <FaSearchPlus />
+                </i>
+                <i className="editor-region-zoom-out" onClick={this.onZoomOut}>
+                  <FaSearchMinus />
+                </i>
+              </span>
+            </div>
+            <div className="imageContainer"
+              onMouseDown={this.onMouseDown}
+              onMouseMove={this.onMouseMove}
+              onMouseUp={this.onMouseUp}
+            >
+              <img src={imgSrcArr[1]}
+                className="uploadImage"
+                style={{...imageAttr}}
+                onLoad={this.onImageLoaded}
+                alt="标注图片"
+              >
+              </img>
+              <div className="labelRegion" 
+                style={{...imageAttr, cursor: (currentStatus === 'inMoving') ? 'move' : 'crosshair'}}
+              >
+                {width !== '' && (
+                  <Rnd
+                    className="rnd"
+                    style={{display: 'flex'}}
+                    size={{ width, height}}
+                    position={{ x: x , y: y}}
+                    bounds="parent"
+                  >
+                  </Rnd>
+                )}
+                {
+                  labelRectsList.map((labelItem, index) => {
+                    return (
+                      <Rnd
+                        className="rnd"
+                        style={{display: 'flex'}}
+                        size={{ width: labelItem.width, height: labelItem.height}}
+                        position={{ x: labelItem.x , y: labelItem.y}}
+                        onDrag={this.onDrag}
+                        onDragStop={this.onDragStop.bind(this, index)}
+                        onResize={this.onResize.bind(this, index)}
+                        onResizeStop={this.onResizeStop.bind(this, index)}
+                        bounds="parent"
+                        resizeHandleStyles={{
+                          topLeft: {...resizeHandleStyle, left: -4, top: -4},
+                          topRight: {...resizeHandleStyle, right: -4, top: -4},
+                          bottomLeft: {...resizeHandleStyle, left: -4, bottom: -4},
+                          bottomRight: {...resizeHandleStyle, right: -4, bottom: -4}
+                        }}
+                        key={index}
+                      >
+                        <div className="label-name-region">
+                          <i className="label-del" onClick={this.onDeleteCurrentLabel.bind(this, index)}>
+                            <FaTrash />
+                          </i>
+                          <span>{labelItem.labelName || '请在右侧选择或添加新标签'}</span>
+                        </div>
+                      </Rnd>
+                    );
+                  })
+                }
+              </div>
+            </div>
           </div>
-          <div className="imageContainer"
-            onMouseDown={this.onMouseDown}
-            onMouseMove={this.onMouseMove}
-            onMouseUp={this.onMouseUp}
-          >
-            <img src={imgSrcArr[1]}
-              className="uploadImage"
-              style={{...imageAttr}}
-              onLoad={this.onImageLoaded}
-              alt="标注图片"
-            >
-            </img>
-            <div className="labelRegion" 
-              style={{...imageAttr, cursor: (currentStatus === 'inMoving') ? 'move' : 'crosshair'}}
-            >
-              {width !== '' && (
-                <Rnd
-                  className="rnd"
-                  style={{display: 'flex'}}
-                  size={{ width, height}}
-                  position={{ x: x , y: y}}
-                  bounds="parent"
-                >
-                </Rnd>
-              )}
-              {
-                labelRectsList.map((labelItem, index) => {
-                  return (
-                    <Rnd
-                      className="rnd"
-                      style={{display: 'flex'}}
-                      size={{ width: labelItem.width, height: labelItem.height}}
-                      position={{ x: labelItem.x , y: labelItem.y}}
-                      onDrag={this.onDrag}
-                      onDragStop={this.onDragStop.bind(this, index)}
-                      onResize={this.onResize.bind(this, index)}
-                      onResizeStop={this.onResizeStop.bind(this, index)}
-                      bounds="parent"
-                      resizeHandleStyles={{
-                        topLeft: {...resizeHandleStyle, left: -4, top: -4},
-                        topRight: {...resizeHandleStyle, right: -4, top: -4},
-                        bottomLeft: {...resizeHandleStyle, left: -4, bottom: -4},
-                        bottomRight: {...resizeHandleStyle, right: -4, bottom: -4}
-                      }}
-                      key={index}
-                    >
-                      <div className="label-name-region">
-                        <i className="label-del" onClick={this.onDeleteCurrentLabel.bind(this, index)}>
-                          <FaTrash />
-                        </i>
-                        <span>{labelItem.labelName || '请在右侧选择或添加新标签'}</span>
-                      </div>
-                    </Rnd>
-                  );
-                })
-              }
+          <div className="app-tags-region">
+            <div className="label-tags-header">
+                <span>标签</span>
+            </div>
+            <div className="label-tags-container">
+                <div className="add-label-tag" onClick={this.onAddLabelTag}>+ 添加标签</div>
+                {showTagInput && (
+                  <div className="input-tag-region">
+                    <input type="text" placeholder="输入字母/数字" className="input-label-tag" ref={(inputTag) => {this.inputTag = inputTag}}></input>
+                    <div className="input-confirm-cancel">
+                      <span onClick={this.onConfirmInput}>确定&nbsp;</span>
+                      <span onClick={this.onCancelInput}>取消</span>
+                    </div>
+                  </div>
+                )}
+                <ul className="current-added-tags-ul">
+                  {currentLabelTags.map((tag, index) => {
+                    return (
+                      <li className="current-added-tags-li" key={index} onClick={this.onChooseCurrentTag.bind(this, tag)}>
+                        {tag}
+                      </li>
+                    )
+                  })}
+                </ul>
             </div>
           </div>
         </div>
-        <div className="app-tags-region">
-          <div className="label-tags-header">
-              <span>标签</span>
-          </div>
-          <div className="label-tags-container">
-              <div className="add-label-tag" onClick={this.onAddLabelTag}>+ 添加标签</div>
-              {showTagInput && (
-                <div className="input-tag-region">
-                  <input type="text" placeholder="输入字母/数字" className="input-label-tag" ref={(inputTag) => {this.inputTag = inputTag}}></input>
-                  <div className="input-confirm-cancel">
-                    <span onClick={this.onConfirmInput}>确定&nbsp;</span>
-                    <span onClick={this.onCancelInput}>取消</span>
-                  </div>
-                </div>
-              )}
-              <ul className="current-added-tags-ul">
-                {currentLabelTags.map((tag, index) => {
-                  return (
-                    <li className="current-added-tags-li" key={index} onClick={this.onChooseCurrentTag}>
-                      {tag}
-                    </li>
-                  )
-                })}
-              </ul>
-          </div>
+        <div className="save-label-data" onClick={this.onSaveLabelData}>
+          保存
         </div>
       </div>
-
-
     );
   }
 }
