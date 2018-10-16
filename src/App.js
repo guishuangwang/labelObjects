@@ -31,7 +31,9 @@ class App extends Component {
         y: 0
       },
       labelRectsList: [], // 所有标注框的列表
-      currentStatus: 'inLabel' // inLabel or inMoving
+      currentStatus: 'inLabel', // inLabel or inMoving
+      currentLabelTags: [], // 当前右侧标签列表
+      showTagInput: false // 是否展现tag输入框
     };
     this.initialScale = 1;
     this.initialWidth = 0;
@@ -238,8 +240,37 @@ class App extends Component {
     });
   }
 
+  // 点击添加标签
+  onAddLabelTag = (e) => {
+    this.setState({
+      showTagInput: true
+    });
+  }
+
+  // 确认输入，添加标签
+  onConfirmInput = (e) => {
+    let {currentLabelTags} = this.state;
+    this.inputTag.value && currentLabelTags.push(this.inputTag.value);
+    this.setState({
+      currentLabelTags,
+      showTagInput: false
+    });
+  }
+
+  // 取消输入
+  onCancelInput = (e) => {
+    this.setState({
+      showTagInput: false
+    });
+  }
+
+  // 点击右侧标签
+  onChooseCurrentTag = () => {
+
+  }
+
   render() {
-    let {currentLabelRect:{width, height, x, y}, imageAttr, labelRectsList, currentStatus} = this.state;
+    let {currentLabelRect:{width, height, x, y}, imageAttr, labelRectsList, currentStatus, currentLabelTags, showTagInput} = this.state;
     let resizeHandleStyle = {
       width: 8,
       height: 8,
@@ -330,16 +361,25 @@ class App extends Component {
               <span>标签</span>
           </div>
           <div className="label-tags-container">
-              <div className="add-label-tag">+ 添加标签</div>
-              <div className="input-tag-region">
-                <input type="text" placeholder="输入字母/数字" className="input-label-tag"></input>
-                <div className="input-confirm-cancel">
-                  <span>确定</span>
-                  <span>取消</span>
+              <div className="add-label-tag" onClick={this.onAddLabelTag}>+ 添加标签</div>
+              {showTagInput && (
+                <div className="input-tag-region">
+                  <input type="text" placeholder="输入字母/数字" className="input-label-tag" ref={(inputTag) => {this.inputTag = inputTag}}></input>
+                  <div className="input-confirm-cancel">
+                    <span onClick={this.onConfirmInput}>确定&nbsp;</span>
+                    <span onClick={this.onCancelInput}>取消</span>
+                  </div>
                 </div>
-              </div>
-              <li>cat</li>
-              <li>chicken</li>
+              )}
+              <ul className="current-added-tags-ul">
+                {currentLabelTags.map((tag, index) => {
+                  return (
+                    <li className="current-added-tags-li" key={index} onClick={this.onChooseCurrentTag}>
+                      {tag}
+                    </li>
+                  )
+                })}
+              </ul>
           </div>
         </div>
       </div>
