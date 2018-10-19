@@ -3,6 +3,7 @@ import './App.css';
 import {Rnd} from 'react-rnd';
 import {FaSearchPlus, FaSearchMinus, FaEdit, FaArrowsAlt, FaTrash} from 'react-icons/fa';
 // import {IconContext} from 'react-icons';
+import {calculateRectXY} from './utils';
 
 const imgSrcArr = [
   'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1539177924149&di=ed1126e51917c7ad8f8326238ae396f9&imgtype=0&src=http%3A%2F%2Fimgsrc.baidu.com%2Fimgad%2Fpic%2Fitem%2F5fdf8db1cb134954582498475c4e9258d1094ade.jpg',
@@ -149,10 +150,14 @@ class App extends Component {
       if(this.inEditing && e.target.getAttribute('class') === 'labelRegion') {
         newLabelRect.width = Math.abs(e.nativeEvent.offsetX - this.editingStartX) * 100 / imageAttr.width + '%';
         newLabelRect.height = Math.abs(e.nativeEvent.offsetY - this.editingStartY) * 100 / imageAttr.height + '%';
-        if(e.nativeEvent.offsetX - newLabelRect.x < 0) {
-          newLabelRect.x = e.nativeEvent.offsetX;
-          newLabelRect.y = e.nativeEvent.offsetY;
-        }
+        // if(e.nativeEvent.offsetX - newLabelRect.x < 0) {
+        //   newLabelRect.x = e.nativeEvent.offsetX;
+        //   newLabelRect.y = e.nativeEvent.offsetY;
+        // }
+        // 根据滑动方向确定选框的位置参数
+        let rectXY = calculateRectXY(this.editingStartX, this.editingStartY, e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+        newLabelRect.x = rectXY.x;
+        newLabelRect.y = rectXY.y;
         this.setState({
           currentLabelRect: newLabelRect
         });
