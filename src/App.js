@@ -25,9 +25,9 @@ class App extends Component {
         left: 10
       },
       imageScale: 1, // 当前标注图片与原图的缩放比例
-      currentLabelRect: {
-        width: '',
-        height: '',
+      currentLabelRect: { // 当前框选区域
+        width: 0,
+        height: 0,
         x: 0,
         y: 0
       },
@@ -47,9 +47,9 @@ class App extends Component {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
-    this.onDragStop = this.onDragStop.bind(this);
-    this.onResize = this.onResize.bind(this);
-    this.onResizeStop = this.onResizeStop.bind(this);
+    // this.onDragStop = this.onDragStop.bind(this);
+    // this.onResize = this.onResize.bind(this);
+    // this.onResizeStop = this.onResizeStop.bind(this);
   }
 
   onImageLoaded = (e) => {
@@ -77,6 +77,7 @@ class App extends Component {
   }
 
   onResize = (idx, e, direction, ref, delta, position) => {
+    e && e.stopPropagation();
     let {labelRectsList} = this.state;
     labelRectsList[idx] = Object.assign({}, labelRectsList[idx], {
       width: ref.style.width,
@@ -133,8 +134,8 @@ class App extends Component {
       if(e.target.getAttribute('class') === 'labelRegion') {
         newLabelRect.x = e.nativeEvent.offsetX;
         newLabelRect.y = e.nativeEvent.offsetY;
-        newLabelRect.width = '0%';
-        newLabelRect.height = '0%';
+        newLabelRect.width = 0;
+        newLabelRect.height = 0;
         this.setState({
           currentLabelRect: newLabelRect
         });
@@ -148,8 +149,10 @@ class App extends Component {
     let {currentStatus, currentLabelRect:newLabelRect, imageAttr} = this.state;
     if(currentStatus === 'inLabel') {
       if(this.inEditing && e.target.getAttribute('class') === 'labelRegion') {
-        newLabelRect.width = Math.abs(e.nativeEvent.offsetX - this.editingStartX) * 100 / imageAttr.width + '%';
-        newLabelRect.height = Math.abs(e.nativeEvent.offsetY - this.editingStartY) * 100 / imageAttr.height + '%';
+        newLabelRect.width = Math.abs(e.nativeEvent.offsetX - this.editingStartX);
+        newLabelRect.height = Math.abs(e.nativeEvent.offsetY - this.editingStartY)
+        // newLabelRect.width = Math.abs(e.nativeEvent.offsetX - this.editingStartX) * 100 / imageAttr.width + '%';
+        // newLabelRect.height = Math.abs(e.nativeEvent.offsetY - this.editingStartY) * 100 / imageAttr.height + '%';
         // if(e.nativeEvent.offsetX - newLabelRect.x < 0) {
         //   newLabelRect.x = e.nativeEvent.offsetX;
         //   newLabelRect.y = e.nativeEvent.offsetY;
@@ -173,16 +176,22 @@ class App extends Component {
     }
   }
   onMouseUp = (e) => {
-    let {currentStatus, currentLabelRect, labelRectsList} = this.state;
+    let {currentStatus, currentLabelRect: {width, height, x, y}, labelRectsList, imageAttr} = this.state;
     if(currentStatus === 'inLabel') {
       // drag stop会触发mouse up，防止push空的数据
-      if(this.inEditing && currentLabelRect.width !== '') {
-        labelRectsList.push(currentLabelRect);
+      if(this.inEditing && width !== 0 && height !== 0) {
+        // push前将宽高转换成百分比形式，给rnd组件使用
+        labelRectsList.push({
+          width: `${width * 100 / imageAttr.width}%`,
+          height: `${height * 100 / imageAttr.height}%`,
+          x,
+          y
+        });
         this.setState({
           labelRectsList,
           currentLabelRect: {
-            width: '',
-            height: '',
+            width: 0,
+            height: 0,
             x: 0,
             y: 0
           }
@@ -333,15 +342,20 @@ class App extends Component {
               <div className="labelRegion" 
                 style={{...imageAttr, cursor: (currentStatus === 'inMoving') ? 'move' : 'crosshair'}}
               >
-                {width !== '' && (
-                  <Rnd
-                    className="rnd"
-                    style={{display: 'flex'}}
-                    size={{ width, height}}
-                    position={{ x: x , y: y}}
-                    bounds="parent"
+                {width !== 0 && height !== 0 && (
+                  // <Rnd
+                  //   className="rnd"
+                  //   style={{display: 'flex'}}
+                  //   size={{ width, height}}
+                  //   position={{ x: x , y: y}}
+                  //   bounds="parent"
+                  // >
+                  // </Rnd>
+                  <div 
+                    className="currentRect"
+                    style={{width, height, top: y, left: x}}
                   >
-                  </Rnd>
+                  </div>
                 )}
                 {
                   labelRectsList.map((labelItem, index) => {
