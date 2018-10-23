@@ -3,7 +3,7 @@ import './App.css';
 import {Rnd} from 'react-rnd';
 import {FaSearchPlus, FaSearchMinus, FaEdit, FaArrowsAlt, FaTrash} from 'react-icons/fa';
 // import {IconContext} from 'react-icons';
-import {calculateRectXY} from './utils';
+import {calculateRectXY, convertWidthAndHeight} from './utils';
 
 const imgSrcArr = [
   'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1539177924149&di=ed1126e51917c7ad8f8326238ae396f9&imgtype=0&src=http%3A%2F%2Fimgsrc.baidu.com%2Fimgad%2Fpic%2Fitem%2F5fdf8db1cb134954582498475c4e9258d1094ade.jpg',
@@ -80,8 +80,8 @@ class App extends Component {
     e && e.stopPropagation();
     let {labelRectsList} = this.state;
     labelRectsList[idx] = Object.assign({}, labelRectsList[idx], {
-      width: ref.style.width,
-      height: ref.style.height,
+      width: convertWidthAndHeight(ref.style.width),
+      height: convertWidthAndHeight(ref.style.height),
       ...position,
     });
     this.setState({
@@ -90,7 +90,7 @@ class App extends Component {
   }
 
   onResizeStop = (idx, e, direction, ref, delta, position) => {
-    console.log('x: ', position.x, ',y: ', position.y, ',width: ', ref.style.width, ',height: ', ref.style.height);
+    console.log('x: ', position.x, ',y: ', position.y, ',width: ', convertWidthAndHeight(ref.style.width), ',height: ', convertWidthAndHeight(ref.style.height));
     this.currentRectIndex = idx;
   }
 
@@ -182,8 +182,10 @@ class App extends Component {
       if(this.inEditing && width !== 0 && height !== 0) {
         // push前将宽高转换成百分比形式，给rnd组件使用
         labelRectsList.push({
-          width: `${width * 100 / imageAttr.width}%`,
-          height: `${height * 100 / imageAttr.height}%`,
+          // width: `${width * 100 / imageAttr.width}%`,
+          // height: `${height * 100 / imageAttr.height}%`,
+          width,
+          height,
           x,
           y
         });
@@ -208,6 +210,7 @@ class App extends Component {
     if(imageScale < 1.3) {
       let oldScale = imageScale;
       imageScale += 0.1;
+      let scaleRatio = imageScale / oldScale;
       width = imageScale * this.initialWidth;
       height = imageScale * this.initialHeight;
       top = (regionHeight - height) / 2;
@@ -217,8 +220,10 @@ class App extends Component {
         imageScale
       });
       labelRectsList.forEach((item) => {
-        item.x *= imageScale / oldScale;
-        item.y *= imageScale / oldScale;
+        item.x *= scaleRatio;
+        item.y *= scaleRatio;
+        item.width *= scaleRatio;
+        item.height *= scaleRatio;
       })
       this.setState({
         labelRectsList
@@ -230,6 +235,7 @@ class App extends Component {
     if(imageScale > 0.5) {
       let oldScale = imageScale;
       imageScale -= 0.1;
+      let scaleRatio = imageScale / oldScale;
       width = imageScale * this.initialWidth;
       height = imageScale * this.initialHeight;
       top = (regionHeight - height) / 2;
@@ -239,8 +245,10 @@ class App extends Component {
         imageScale
       });
       labelRectsList.forEach((item) => {
-        item.x *= imageScale / oldScale;
-        item.y *= imageScale / oldScale;
+        item.x *= scaleRatio;
+        item.y *= scaleRatio;
+        item.width *= scaleRatio;
+        item.height *= scaleRatio;
       })
       this.setState({
         labelRectsList

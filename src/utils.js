@@ -30,3 +30,16 @@ export const calculateRectXY = (oldX, oldY, newX, newY) => {
         };
     }
 }
+
+/**
+ * 将字符串的宽高转换成数字的
+ * '202px' => 202
+ */
+export const convertWidthAndHeight = (str) => {
+    let idx = str.indexOf('px');
+    if(idx !== -1) {
+        return +str.slice(0, idx);
+    }else {
+        return str;
+    }
+}
