@@ -176,29 +176,27 @@ class App extends Component {
     }
   }
   onMouseUp = (e) => {
-    let {currentStatus, currentLabelRect: {width, height, x, y}, labelRectsList, imageAttr} = this.state;
+    let {currentStatus, currentLabelRect: {width, height, x, y}, labelRectsList} = this.state;
     if(currentStatus === 'inLabel') {
       // drag stop会触发mouse up，防止push空的数据
-      if(this.inEditing && width !== 0 && height !== 0) {
+      if(this.inEditing && width >= 10 && height >= 10) {
         // push前将宽高转换成百分比形式，给rnd组件使用
         labelRectsList.push({
-          // width: `${width * 100 / imageAttr.width}%`,
-          // height: `${height * 100 / imageAttr.height}%`,
           width,
           height,
           x,
           y
         });
-        this.setState({
-          labelRectsList,
-          currentLabelRect: {
-            width: 0,
-            height: 0,
-            x: 0,
-            y: 0
-          }
-        });
       }
+      this.setState({
+        labelRectsList,
+        currentLabelRect: {
+          width: 0,
+          height: 0,
+          x: 0,
+          y: 0
+        }
+      });
     }else if(currentStatus === 'inMoving') {
 
     }
